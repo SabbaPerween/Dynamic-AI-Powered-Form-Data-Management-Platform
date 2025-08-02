@@ -1,0 +1,195 @@
+{% extends "core/app_base.html" %}
+
+{% block app_content %}
+    <div class="app-header">
+        <h1><i class="fas fa-edit text-primary me-2"></i>Fill a Form</h1>
+    </div>
+    
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-bold">Select a Form</h5>
+            <p class="card-subtitle text-muted">Choose a form from the dropdown below to begin data entry.</p>
+<!-- Form 1: The Form Selector -->
+<form method="get" class="mb-4">
+    <div class="input-group">
+        <select name="form_id" class="form-select" onchange="this.form.submit()">
+            <option value="">-- Select a form to fill --</option>
+            {% for form in all_forms %}
+                <option value="{{ form.id }}" {% if selected_form.id == form.id %}selected{% endif %}>
+                    {{ form.form_name }}
+                </option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-outline-primary" type="submit">Load Form</button>
+    </div>
+</form>
+
+<!-- This section will only appear AFTER a form has been selected -->
+{% if selected_form %}
+    <div class="card">
+        <div class="card-header fs-5">
+            Now filling out: <strong>{{ selected_form.form_name }}</strong>
+        </div>
+        <div class="card-body">
+            <!-- Form 2: The Actual Data Entry Form -->
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- This hidden input tells the view which form is being submitted -->
+                <input type="hidden" name="form_id" value="{{ selected_form.id }}">
+
+                <!-- If this is a child form, show the parent selector -->
+                {% if selected_form.parent_form %}
+                    <div class="mb-4 p-3 bg-light border rounded">
+                        <label for="parent_submission_id" class="form-label fw-bold">Link to Parent: {{ selected_form.parent_form.form_name }}</label>
+                        <select name="parent_submission_id" id="parent_submission_id" class="form-select" required>
+                            <option value="">-- Select a parent record --</option>
+                            {% for record in parent_records %}
+                                <option value="{{ record.id }}">{{ record.display_text }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+
+                <!-- FULLY CORRECTED DYNAMIC RENDERER -->
+                {% for field in selected_form.fields %}
+                    <div class="mb-3">
+                        <label for="{{ field.name|slugify }}" class="form-label fw-bold">{{ field.name }}</label>
+                        
+                        {% if field.type == "TEXTAREA" %}
+                            <textarea name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required></textarea>
+                        
+                        {% elif field.type == "SELECT" %}
+                            <select name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-select" required>
+                                <option value="" disabled selected>-- Please choose an option --</option>
+                                {% for option in field.options %}<option value="{{ option }}">{{ option }}</option>{% endfor %}
+                            </select>
+                        
+                        {% elif field.type == "MULTISELECT" %}
+                            <select name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-select" multiple required>
+                                {% for option in field.options %}<option value="{{ option }}">{{ option }}</option>{% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Hold Ctrl (or Cmd on Mac) to select multiple.</small>
+
+                        {% elif field.type == "RADIO" %}
+                            {% for option in field.options %}<div class="form-check">
+                                <input class="form-check-input" type="radio" name="{{ field.name }}" id="{{ field.name|slugify }}-{{ forloop.counter }}" value="{{ option }}" required>
+                                <label class="form-check-label" for="{{ field.name|slugify }}-{{ forloop.counter }}">{{ option }}</label>
+                            </div>{% endfor %}
+
+                        {% elif field.type == "CHECKBOX" %}
+                            {% if field.options %} {# Checkbox group #}
+                                {% for option in field.options %}<div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="{{ field.name }}" id="{{ field.name|slugify }}-{{ forloop.counter }}" value="{{ option }}">
+                                    <label class="form-check-label" for="{{ field.name|slugify }}-{{ forloop.counter }}">{{ option }}</label>
+                                </div>{% endfor %}
+                            {% else %} {# Single boolean checkbox #}
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="{{ field.name }}" id="{{ field.name|slugify }}" value="true"></div>
+                            {% endif %}
+
+                        {% elif field.type == "INTEGER" %}
+                            <input type="number" name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required>
+                        {% elif field.type == "FLOAT" %}<input type="number" step="any" name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required>
+                        {% elif field.type == "DATE" %}<input type="date" name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required>
+                        {% elif field.type == "DATETIME" %}<input type="datetime-local" name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required>
+                        {% elif field.type == "EMAIL" %}<input type="email" name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required>
+                        {% elif field.type == "PHONE" %}<input type="tel" name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required>
+                        {% elif field.type == "PASSWORD" %}<input type="password" name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required>
+                        {% elif field.type == "FILE" %}<input type="file" name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required>
+                        {% else %} {# Default for VARCHAR etc. #}
+                            <input type="text" name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <!-- END OF CORRECTED RENDERER -->
+
+                <hr>
+                <button type="submit" class="btn btn-primary w-100">Submit Entry</button>
+            </form>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}
+{% comment %} {% extends "base.html" %}
+
+{% block title %}Fill a Form{% endblock %}
+
+{% block content %}
+<h2><i class="fas fa-edit"></i> Fill a Form</h2>
+<p>Select a form from the dropdown below to begin data entry.</p>
+<hr>
+
+<!-- Form 1: The Form Selector -->
+<form method="get" class="mb-4">
+    <div class="input-group">
+        <select name="form_id" class="form-select" onchange="this.form.submit()">
+            <option value="">-- Select a form to fill --</option>
+            {% for form in all_forms %}
+                <option value="{{ form.id }}" {% if selected_form.id == form.id %}selected{% endif %}>
+                    {{ form.form_name }}
+                </option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-outline-primary" type="submit">Load Form</button>
+    </div>
+</form>
+
+<!-- This section will only appear AFTER a form has been selected -->
+{% if selected_form %}
+    <div class="card">
+        <div class="card-header fs-5">
+            Now filling out: <strong>{{ selected_form.form_name }}</strong>
+        </div>
+        <div class="card-body">
+            <!-- Form 2: The Actual Data Entry Form -->
+            <form method="post" enctype="multipart/form-data">>
+                {% csrf_token %}
+                <!-- This hidden input tells the view which form is being submitted -->
+                <input type="hidden" name="form_id" value="{{ selected_form.id }}">
+
+                <!-- If this is a child form, show the parent selector -->
+                {% if selected_form.parent_form %}
+                    <div class="mb-4 p-3 bg-light border rounded">
+                        <label for="parent_submission_id" class="form-label fw-bold">Link to Parent: {{ selected_form.parent_form.form_name }}</label>
+                        <select name="parent_submission_id" id="parent_submission_id" class="form-select" required>
+                            <option value="">-- Select a parent record --</option>
+                            {% for record in parent_records %}
+                                <option value="{{ record.id }}">{{ record.display_text }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+
+                <!-- Dynamically render the form fields -->
+                {% for field in selected_form.fields %}
+                    <div class="mb-3">
+                        <label for="{{ field.name|slugify }}" class="form-label">{{ field.name }}</label>
+                        
+                        {% if field.type == "TEXTAREA" %}
+                            <textarea name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required></textarea>
+                        
+                        {% elif field.type == "SELECT" %}
+                            <select name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-select" required>
+                                <option value="" disabled selected>-- Choose an option --</option>
+                                {% for option in field.options %}
+                                    <option value="{{ option }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                        
+                        {% elif field.type == "INTEGER" %}
+                             <input type="number" name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required>
+                        
+                        {% else %}
+                             <input type="text" name="{{ field.name }}" id="{{ field.name|slugify }}" class="form-control" required>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <hr>
+                <button type="submit" class="btn btn-primary w-100">Submit Entry</button>
+            </form>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %} {% endcomment %}

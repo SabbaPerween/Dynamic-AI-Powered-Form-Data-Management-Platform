@@ -1,0 +1,30 @@
+{# This is the HTML structure for our custom widget #}
+<div id="json-field-builder-container" style="border: 1px solid #ccc; padding: 15px; border-radius: 4px;">
+    
+    <!-- This is the original textarea that will be hidden and used to store the final JSON -->
+    <textarea name="{{ widget.name }}" class="json-field-builder-data" {% include "django/forms/widgets/attrs.html" %} >{{ widget.value|default:"[]" }}</textarea>
+
+    <!-- The user-friendly interface for building fields -->
+    <div style="margin-bottom: 20px;">
+        <h5 style="margin-top:0;">Add New Field</h5>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <input type="text" id="builder-field-name" class="vTextField" placeholder="Field Name" style="flex: 1;">
+            <select id="builder-field-type" style="flex: 1;">
+                <option value="" disabled selected>-- Select Type --</option>
+                {% for ftype in widget.field_types %}
+                    <option value="{{ ftype }}">{{ ftype }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div id="builder-options-container" style="display: none; margin-bottom: 10px;">
+            <input type="text" id="builder-field-options" class="vTextField" placeholder="Options (comma-separated)" style="width: 100%;">
+        </div>
+        <button type="button" id="builder-add-btn" class="button">Add Field</button>
+    </div>
+    
+    <!-- Where the list of added fields will be displayed -->
+    <div>
+        <h5>Current Fields</h5>
+        <div id="fields-display"></div>
+    </div>
+</div>

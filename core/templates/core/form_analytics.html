@@ -1,0 +1,95 @@
+{% extends "core/app_base.html" %}
+
+{% block title %}Analytics for {{ form.form_name }}{% endblock %}
+
+{% block app_content %}
+<style>
+    /* Styles for the analytics page cards */
+    .stat-card-analytics {
+        background-color: #fff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        height: 100%;
+    }
+    .stat-card-analytics .stat-title {
+        font-weight: 600; color: #718096; font-size: 0.9rem;
+    }
+    .stat-card-analytics .stat-value {
+        font-size: 2.5rem; font-weight: 700; color: #1A202C;
+    }
+    .chart-card {
+        background-color: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 1.5rem;
+    }
+</style>
+
+<!-- ======================= HEADER ======================= -->
+<div class="app-header">
+    <div>
+        <h1 class="h2"><i class="fas fa-chart-pie text-primary me-2"></i>Analytics Dashboard</h1>
+        <p class="text-muted mb-0">Form: <strong>{{ form.form_name }}</strong></p>
+    </div>
+    <a href="{% url 'form_detail' form.id %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Back to Submissions
+    </a>
+</div>
+
+{% if not charts and total_submissions == 0 %}
+    <!-- ======================= EMPTY STATE ======================= -->
+    <div class="text-center p-5 bg-white rounded-3 shadow-sm mt-4">
+        <i class="fas fa-poll fa-3x text-light mb-3"></i>
+        <h4 class="text-muted">No Data to Analyze</h4>
+        <p class="text-muted">There are no submissions for this form yet, so no analytics can be displayed.</p>
+        <a href="{% url 'form_detail' form.id %}" class="btn btn-secondary mt-2">View Submissions</a>
+    </div>
+{% else %}
+    <!-- ======================= KEY METRICS ======================= -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-4">
+            <div class="stat-card-analytics">
+                <div class="stat-title">Total Submissions</div>
+                <div class="stat-value">{{ total_submissions }}</div>
+            </div>
+        </div>
+        {% if child_form_stats %}
+        <div class="col-md-8 mb-4">
+            <div class="stat-card-analytics">
+                <div class="stat-title">Child Form Submissions</div>
+                <ul class="list-group list-group-flush mt-2">
+                    {% for stat in child_form_stats %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        {{ stat.name }}
+                        <span class="badge bg-primary rounded-pill">{{ stat.count }}</span>
+                    </li>
+                    {% empty %}
+                        <li class="list-group-item px-0 text-muted">No child submissions found.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ======================= DYNAMIC CHARTS ======================= -->
+    <h4 class="mb-3 fw-bold">Submission Insights</h4>
+    <div class="row">
+        {% for chart_html in charts %}
+            <div class="col-lg-6 mb-4">
+                <div class="chart-card shadow-sm">
+                    {# The 'safe' filter tells Django to render the raw HTML from the view #}
+                    {{ chart_html|safe }}
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No visual analytics could be generated for the submitted data. This can happen if submissions only contain unique text fields.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

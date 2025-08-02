@@ -1,0 +1,277 @@
+{% extends "core/base.html" %}
+
+{% block title %}The Ultimate Dynamic Form Platform{% endblock %}
+
+{% block content %}
+<style>
+    /* --- THIS IS THE FIX --- */
+    /* Hide the main application sidebar on the home page */
+    #sidebar {
+        display: none !important;
+    }
+    /* Allow the home page content to take up the full width */
+    #main-content-wrapper {
+        width: 100%;
+        padding: 0; /* Remove padding for full-width hero sections */
+    }
+    /* --- END OF FIX --- */
+
+    /* Advanced CSS for the home page design (unchanged) */
+    body {
+        background-color: #F7FAFC;
+    }
+    .hero-section-advanced {
+        background-color: #1A202C;
+        color: #E2E8F0;
+        padding: 5rem 0;
+        overflow: hidden;
+    }
+    .hero-section-advanced h1 {
+        font-size: 3.2rem;
+        font-weight: 800;
+        color: #FFF;
+        line-height: 1.2;
+    }
+    .hero-section-advanced .lead {
+        font-size: 1.2rem;
+        font-weight: 300;
+        max-width: 600px;
+        color: #A0AEC0;
+    }
+    .hero-section-advanced .btn {
+        font-size: 1.1rem;
+        font-weight: 700;
+        padding: 0.8rem 2.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        transform: translateY(0);
+    }
+    .hero-section-advanced .btn-primary {
+        background-color: #4FD1C5;
+        border-color: #4FD1C5;
+    }
+    .hero-section-advanced .btn-primary:hover {
+        background-color: #38B2AC;
+        border-color: #38B2AC;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(79, 209, 197, 0.2);
+    }
+    .hero-graphic {
+        font-size: 15rem;
+        line-height: 1;
+        background: linear-gradient(45deg, #4FD1C5, #81E6D9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+    }
+    .features-section-advanced {
+        padding: 5rem 0;
+    }
+    .section-title {
+        font-weight: 700;
+        color: #2D3748;
+    }
+    .feature-card {
+        border: none;
+        border-radius: 12px;
+        background-color: #FFF;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    .feature-card .feature-icon-adv {
+        font-size: 2.5rem;
+        color: #4FD1C5;
+    }
+    .how-it-works-section {
+        background-color: #EDF2F7;
+        padding: 5rem 0;
+    }
+    .step {
+        display: flex;
+        align-items: flex-start;
+    }
+    .step-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #4FD1C5;
+        margin-right: 1rem;
+        line-height: 1;
+    }
+    .step-content h5 {
+        font-weight: 600;
+        color: #2D3748;
+    }
+    .final-cta-section {
+        padding: 5rem 0;
+        background-color: #FFF;
+    }
+    .fade-in-element {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .fade-in-element.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section-advanced">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <h1 class="fade-in-element">The Future of Data Collection is Here.</h1>
+                <p class="lead my-4 fade-in-element">Stop wrestling with spreadsheets. Start building intelligent, dynamic forms that power your workflow, complete with AI assistance, advanced analytics, and powerful relationship management.</p>
+                <div class="d-flex gap-2 fade-in-element">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary shadow">Enter Dashboard</a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="btn btn-primary shadow">Get Started for Free</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 text-center d-none d-lg-block">
+                <i class="fas fa-file-signature hero-graphic"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section-advanced">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">An All-in-One Platform</h2>
+            <p class="lead text-muted">Everything you need to go from idea to insight.</p>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-lg-4 mb-4 fade-in-element">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon-adv mb-3"><i class="fas fa-magic"></i></div>
+                    <h5>AI-Powered Creation</h5>
+                    <p class="text-muted small">Just describe your form. Our AI drafts it for you, saving you time and effort.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4 fade-in-element">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon-adv mb-3"><i class="fas fa-sitemap"></i></div>
+                    <h5>Advanced Relationships</h5>
+                    <p class="text-muted small">Link form data together. Model real-world hierarchies like schools, teachers, and students.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4 fade-in-element">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon-adv mb-3"><i class="fas fa-chart-pie"></i></div>
+                    <h5>Insightful Analytics</h5>
+                    <p class="text-muted small">Don't just collect data. Visualize it with auto-generated charts and dashboards.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4 fade-in-element">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon-adv mb-3"><i class="fas fa-users-cog"></i></div>
+                    <h5>Team Permissions</h5>
+                    <p class="text-muted small">Control who can view, edit, or manage forms and their submissions with granular access levels.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4 fade-in-element">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon-adv mb-3"><i class="fas fa-file-export"></i></div>
+                    <h5>Multiple Export Options</h5>
+                    <p class="text-muted small">Download your data anytime as CSV, Excel, or a print-ready PDF for easy sharing.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4 fade-in-element">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon-adv mb-3"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <h5>File Uploads</h5>
+                    <p class="text-muted small">Easily collect documents, images, and other files as part of your form submissions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it Works Section -->
+<section class="how-it-works-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Get Results in 3 Simple Steps</h2>
+        </div>
+        <div class="row align-items-center">
+            <div class="col-md-4 mb-4 fade-in-element">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h5>Create Your Form</h5>
+                        <p class="text-muted small">Design your form manually with our intuitive builder or let our AI do the heavy lifting.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 fade-in-element">
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h5>Collect Submissions</h5>
+                        <p class="text-muted small">Share a public link or use the internal data entry system to start collecting data securely.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 fade-in-element">
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h5>Analyze & Export</h5>
+                        <p class="text-muted small">View submissions, visualize trends in the analytics dashboard, and export your data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA Section -->
+<section class="final-cta-section text-center">
+    <div class="container fade-in-element">
+        <h2 class="section-title">Ready to Revolutionize Your Workflow?</h2>
+        <p class="lead text-muted my-3">Sign up for free. No credit card required.</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'form_create' %}" class="btn btn-primary btn-lg mt-3 shadow">Create Your First Form</a>
+        {% else %}
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg mt-3 shadow">Sign Up Now</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block javascript %}
+<script>
+// JavaScript for the fade-in-on-scroll animation
+document.addEventListener('DOMContentLoaded', function() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, {
+        threshold: 0.1 // Trigger when 10% of the element is visible
+    });
+
+    const elementsToAnimate = document.querySelectorAll('.fade-in-element');
+    elementsToAnimate.forEach(el => {
+        observer.observe(el);
+    });
+});
+</script>
+{% endblock %}

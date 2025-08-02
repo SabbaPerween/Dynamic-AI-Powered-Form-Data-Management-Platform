@@ -1,0 +1,227 @@
+{% extends "core/app_base.html" %}
+
+{% block app_content %}
+    <div class="app-header">
+        <h1><i class="fas fa-sitemap text-primary me-2"></i>Manage Child Relationships</h1>
+    </div>
+<p>Select a parent record to view, create, or delete relationships between its children.</p>
+<hr>
+
+<!-- Step 1 & 2: Filter controls -->
+<div class="card mb-4">
+    <div class="card-body bg-light">
+        <form method="get" id="relationship-filter-form">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="parent_form_id" class="form-label">Step 1: Select a Parent Form</label>
+                    <select name="parent_form_id" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- Choose a form type --</option>
+                        {% for form in parent_forms %}
+                            <option value="{{ form.id }}" {% if selected_parent_form_id|stringformat:"s" == form.id|stringformat:"s" %}selected{% endif %}>{{ form.form_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if parent_submissions %}
+                <div class="col-md-5">
+                    <label for="parent_submission_id" class="form-label">Step 2: Select a Parent Record</label>
+                    <select name="parent_submission_id" class="form-select" onchange="this.form.submit()">
+                         <option value="">-- Choose a record --</option>
+                         {% for sub in parent_submissions %}
+                            <option value="{{ sub.id }}" {% if selected_parent_submission_id|stringformat:"s" == sub.id|stringformat:"s" %}selected{% endif %}>{{ sub }}</option>
+                         {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Step 3: Management Panel -->
+{% if selected_parent_submission %}
+<div class="card">
+    <div class="card-header">
+        <h4>Managing Relationships for: {{ selected_parent_submission }}</h4>
+    </div>
+    <div class="card-body">
+        <!-- The creation form is the same as the one from the dashboard -->
+        <h5><i class="fas fa-plus-circle"></i> Create New Relationship</h5>
+            <!-- ... (Paste the entire <form> block for creation here, it's identical) ... -->
+        <form action="{% url 'create_child_relationship' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="parent_submission_id" value="{{ selected_parent_submission.id }}">
+            <input type="hidden" name="parent_form_id" value="{{ selected_parent_form_id }}">
+                    
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="source_form_type" class="form-label">First Child Form</label>
+                    <select id="source_form_type" class="form-select">
+                                <!-- FIX 1: Added value="" to the placeholder option -->
+                        <option value="">-- Select form type --</option>
+                        {% for type in child_form_types %}
+                        <option value="{{ type.id }}">{{ type.form_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="target_form_type" class="form-label">Second Child Form</label>
+                    <select id="target_form_type" class="form-select">
+                                <!-- FIX 1: Added value="" to the placeholder option -->
+                        <option value="">-- Select form type --</option>
+                        {% for type in child_form_types %}
+                        <option value="{{ type.id }}">{{ type.form_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="source_submission_id" class="form-label">Select a record from '<span id="source-form-name-label">...</span>'</label>
+                    <select name="source_submission_id" id="source_submission_id" class="form-select" required></select>
+                </div>
+                <div class="col-md-6">
+                    <label for="target_submission_id" class="form-label">Select a record from '<span id="target-form-name-label">...</span>'</label>
+                    <select name="target_submission_id" id="target_submission_id" class="form-select" required></select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="relationship_type" class="form-label">Relationship Type</label>
+                <input type="text" name="relationship_type" class="form-control" placeholder="e.g., Teaches, Advisor, Mentor" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-link"></i> Create Relationship
+            </button>
+        </form>
+        
+
+        <hr class="my-4">
+
+        <!-- The display and delete table -->
+        <h5><i class="fas fa-list-ul"></i> Established Relationships</h5>
+        {% if relationships %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>From (Source)</th>
+                        <th>Relationship</th>
+                        <th>To (Target)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for rel in relationships %}
+                    <tr>
+                        <td>{{ rel.source_submission }}</td>
+                        <td><span class="badge bg-info">{{ rel.relationship_type }}</span></td>
+                        <td>{{ rel.target_submission }}</td>
+                        <td>
+                            <form action="{% url 'delete_child_relationship' rel.id %}" method="post" onsubmit="return confirm('Are you sure you want to delete this relationship?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="text-muted">No relationships have been established for this record yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+    <div class="alert alert-info">Please select a parent record to begin managing relationships.</div>
+{% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const sourceFormTypeSelect = document.getElementById('source_form_type');
+        const targetFormTypeSelect = document.getElementById('target_form_type');
+        const sourceSubmissionSelect = document.getElementById('source_submission_id');
+        const targetSubmissionSelect = document.getElementById('target_submission_id');
+        const sourceLabelSpan = document.getElementById('source-form-name-label');
+        const targetLabelSpan = document.getElementById('target-form-name-label');
+        
+        // This check is important: if the relationship creator isn't on the page, do nothing.
+        if (!sourceFormTypeSelect) {
+            return;
+        }
+
+        const parentSubmissionId = "{{ selected_parent_submission.id }}";
+        if (!parentSubmissionId) {
+            // If there's no parent ID, the script can't work.
+            return;
+        }
+
+        async function updateSubmissionDropdown(formTypeSelect, submissionDropdown, labelSpan) {
+            // Get the ID of the selected child form (e.g., "Student Form")
+            const formTypeId = formTypeSelect.value;
+
+            // First, check if the user selected the placeholder. If so, clear everything and stop.
+            if (!formTypeId) {
+                submissionDropdown.innerHTML = '';
+                labelSpan.textContent = '...';
+                return;
+            }
+            
+            // Get the visible text of the selected option to update the label
+            const selectedFormName = formTypeSelect.options[formTypeSelect.selectedIndex].text;
+            
+            // Update the UI to show we are loading data
+            submissionDropdown.innerHTML = '<option value="">-- Loading... --</option>';
+            labelSpan.textContent = selectedFormName;
+
+            // Construct the API URL to fetch the records
+            const url = `/api/admin/get-child-submissions/?parent_submission_id=${parentSubmissionId}&child_form_id=${formTypeId}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`API request failed with status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                // Clear the dropdown before adding new options
+                submissionDropdown.innerHTML = ''; 
+
+                if (data.length === 0) {
+                     submissionDropdown.innerHTML = '<option value="">-- No records found --</option>';
+                } else {
+                    submissionDropdown.innerHTML = '<option value="">-- Select a record --</option>';
+                    data.forEach(item => {
+                        const option = new Option(item.text, item.id);
+                        submissionDropdown.add(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to update submission dropdown:', error);
+                submissionDropdown.innerHTML = '<option value="">-- Error loading records --</option>';
+            }
+        }
+
+        // Attach the event listeners
+        sourceFormTypeSelect.addEventListener('change', function() {
+            updateSubmissionDropdown(this, sourceSubmissionSelect, sourceLabelSpan);
+        });
+
+        targetFormTypeSelect.addEventListener('change', function() {
+            updateSubmissionDropdown(this, targetSubmissionSelect, targetLabelSpan);
+        });
+
+    } catch(e) {
+        console.error("A critical error occurred in the dashboard JavaScript:", e);
+    }
+});
+</script>
+{% endblock %}

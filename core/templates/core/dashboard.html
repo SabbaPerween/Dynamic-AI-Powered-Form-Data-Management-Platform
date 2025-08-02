@@ -1,0 +1,130 @@
+{% extends "core/app_base.html" %}
+
+{% block app_content %}
+<style>
+    /* Additional styles specific to the dashboard cards */
+    .stat-card-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background-color: #fff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+    }
+    .stat-card .stat-title {
+        font-weight: 600; color: #718096; font-size: 0.9rem;
+    }
+    .stat-card .stat-value {
+        font-size: 2.2rem; font-weight: 700; color: #1A202C;
+    }
+    .form-card {
+        background: #FFFFFF;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+    }
+    .form-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 7px 15px rgba(0,0,0,0.06);
+    }
+    .form-card .status-dot {
+        height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 0.5rem;
+    }
+</style>
+
+<!-- Header -->
+<div class="app-header">
+    <h1>Dashboard</h1>
+    <div class="d-flex align-items-center">
+         <form action="{% url 'logout' %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <span class="text-muted me-3 small">Welcome, {{ request.user.username }} ({{ request.user.get_role_display }})</span>
+            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-sign-out-alt me-1"></i> Logout
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="stat-card-row">
+    <div class="stat-card">
+        <div class="stat-title">My Submissions</div>
+        <div class="stat-value">{{ my_submissions_count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Active Forms</div>
+        <div class="stat-value">{{ active_forms_count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Draft Forms</div>
+        <div class="stat-value">{{ draft_forms_count }}</div>
+    </div>
+     <div class="stat-card">
+        <div class="stat-title">Total Accessible</div>
+        <div class="stat-value">{{ total_forms_count }}</div>
+    </div>
+</div>
+
+<!-- Search and Title -->
+<div class="d-flex justify-content-between align-items-center mb-3 mt-4">
+    <h4 style="font-weight: 600;">Your Forms</h4>
+    <div class="w-50">
+         <form method="get" action="">
+            <div class="input-group">
+                <input type="text" name="q" class="form-control" placeholder="Search forms..." value="{{ search_query|default_if_none:'' }}">
+                <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Form Grid -->
+<div class="row">
+    {% for form in forms_list %}
+        <div class="col-lg-6 mb-4">
+            <div class="form-card">
+                <div class="card-body">
+                    <h5 class="card-title mb-1" style="font-weight: 600;">{{ form.form_name }}</h5>
+                    <p class="card-text text-muted small">
+                        <span class="status-dot 
+                            {% if form.status == 'active' %}bg-success
+                            {% elif form.status == 'draft' %}bg-warning
+                            {% else %}bg-secondary{% endif %}"></span>
+                        {{ form.get_status_display }}
+                        · {{ form.submissions.count }} Submission(s)
+                    </p>
+                </div>
+                <div class="card-footer bg-light d-flex justify-content-end gap-2">
+                    <a href="{% url 'form_analytics' form.id %}" class="btn btn-sm btn-outline-secondary" title="Analytics"><i class="fas fa-chart-pie"></i></a>
+                    <a href="{% url 'form_edit' form.id %}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="fas fa-pencil-alt"></i></a>
+                    <a href="{% url 'form_detail' form.id %}" class="btn btn-sm text-white" style="background-color: #2D3748;">View Details</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+             <div class="text-center p-5 bg-white rounded-3 shadow-sm">
+                {% if search_query %}
+                    <i class="fas fa-search fa-3x text-light mb-3"></i>
+                    <h4>No Forms Found</h4>
+                    <p class="text-muted">Your search for "{{ search_query }}" did not match any of your forms.</p>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-2">Clear Search</a>
+                {% else %}
+                    <i class="fas fa-file-alt fa-3x text-light mb-3"></i>
+                    <h4>Your dashboard is looking a little empty.</h4>
+                    <p class="text-muted">Let's get started by creating your very first form.</p>
+                    <a href="{% url 'form_create' %}" class="btn btn-lg text-white mt-3" style="background-color: #4FD1C5;">Create Your First Form</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

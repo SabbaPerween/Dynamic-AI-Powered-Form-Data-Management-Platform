@@ -1,0 +1,114 @@
+{% extends "core/base.html" %}
+
+{% block title %}Create Your Account{% endblock %}
+
+{% block content %}
+<style>
+    /* This CSS block can be shared between login and register */
+    .auth-section {
+        background-color: #F7FAFC;
+        padding: 4rem 0;
+    }
+    .auth-card {
+        background-color: #FFF;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .auth-card-header {
+        background-color: #1A202C;
+        color: #FFF;
+        padding: 2rem;
+        text-align: center;
+    }
+    .auth-card-header h3 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .auth-card-header .fa-user-plus {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: block;
+        color: #4FD1C5;
+    }
+    .auth-card .form-floating label {
+        color: #A0AEC0;
+    }
+    .auth-card .btn-primary {
+        background-color: #4FD1C5;
+        border-color: #4FD1C5;
+        font-weight: 600;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    .auth-card .btn-primary:hover {
+        background-color: #38B2AC;
+        border-color: #38B2AC;
+        transform: translateY(-2px);
+    }
+    .auth-card-footer {
+        background-color: #EDF2F7;
+    }
+</style>
+
+<div class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="auth-card">
+                    <div class="auth-card-header">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>Create an Account</h3>
+                        <p class="text-muted small mb-0">Start building powerful forms today.</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post">
+                            {% csrf_token %}
+
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {% for field in form %}
+                                <div class="form-floating mb-3">
+                                    {% if field.field.widget.input_type == 'select' %}
+                                        <select name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-select {% if field.errors %}is-invalid{% endif %}" required>
+                                            {% for value, text in field.field.choices %}
+                                                <option value="{{ value }}">{{ text }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% else %}
+                                        <input type="{{ field.field.widget.input_type }}" 
+                                               name="{{ field.name }}" 
+                                               id="{{ field.id_for_label }}" 
+                                               class="form-control {% if field.errors %}is-invalid{% endif %}"
+                                               placeholder="{{ field.label }}"
+                                               {% if field.field.required %}required{% endif %}>
+                                    {% endif %}
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary">Create Account</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center py-3 auth-card-footer">
+                        <div class="small">
+                            <a href="{% url 'login' %}">Already have an account? Sign in</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

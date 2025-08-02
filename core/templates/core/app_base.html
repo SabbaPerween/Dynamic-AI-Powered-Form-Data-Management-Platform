@@ -1,0 +1,112 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<style>
+    /* Hide the default layout elements on all app pages */
+    #sidebar, .navbar {
+        display: none !important;
+    }
+    #main-content {
+        padding: 0;
+        background-color: #F7FAFC;
+    }
+    
+    /* Main App Layout */
+    .app-container {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        min-height: 100vh;
+    }
+
+    @media (max-width: 992px) {
+        .app-container { grid-template-columns: 1fr; }
+        .app-sidebar { display: none; }
+    }
+
+    /* Sidebar Styles */
+    .app-sidebar {
+        background-color: #1A202C;
+        color: #A0AEC0;
+        padding: 1.5rem;
+    }
+    .app-sidebar .brand {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #FFF;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 2rem;
+    }
+    .app-sidebar .brand i { color: #4FD1C5; }
+    .sidebar-heading {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        color: #718096;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .sidebar-link {
+        display: block;
+        color: #A0AEC0;
+        text-decoration: none;
+        padding: 0.6rem 0.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .sidebar-link:hover {
+        background-color: #2D3748;
+        color: #FFF;
+    }
+    .sidebar-link.active { /* Style for the current page's link */
+        background-color: #4FD1C5;
+        color: #1A202C;
+    }
+    .sidebar-link i {
+        margin-right: 0.75rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    /* Main Content Area Styles */
+    .app-main-content {
+        padding: 2rem 2.5rem;
+    }
+    .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    .app-header h1 {
+        font-weight: 700;
+        color: #2D3748;
+        margin: 0;
+    }
+</style>
+
+<div class="app-container">
+    <!-- ======================= APP SIDEBAR (Consistent on all pages) ======================= -->
+    <aside class="app-sidebar">
+        <a href="{% url 'home' %}" class="brand"><i class="fas fa-file-alt"></i> Form Platform</a>
+        
+        <p class="sidebar-heading">Navigation</p>
+        <a href="{% url 'dashboard' %}" class="sidebar-link {% if active_page == 'dashboard' %}active{% endif %}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+        <a href="{% url 'form_create' %}" class="sidebar-link {% if active_page == 'create_form' %}active{% endif %}"><i class="fas fa-plus"></i>Create Form</a>
+        <a href="{% url 'internal_form_fill' %}" class="sidebar-link {% if active_page == 'fill_form' %}active{% endif %}"><i class="fas fa-edit"></i>Fill a Form</a>
+        <a href="{% url 'my_submissions' %}" class="sidebar-link {% if active_page == 'my_submissions' %}active{% endif %}"><i class="fas fa-history"></i>My Submissions</a>
+        
+        <p class="sidebar-heading">Management</p>
+        <a href="{% url 'manage_form_hierarchy' %}" class="sidebar-link {% if active_page == 'manage_hierarchy' %}active{% endif %}"><i class="fas fa-layer-group"></i>Manage Hierarchy</a>
+        <a href="{% url 'manage_relationships' %}" class="sidebar-link {% if active_page == 'manage_relationships' %}active{% endif %}"><i class="fas fa-sitemap"></i>Manage Relationships</a>
+    </aside>
+
+    <!-- ======================= MAIN CONTENT AREA ======================= -->
+    <main class="app-main-content">
+        <!-- This is where the content of each specific page will go -->
+        {% block app_content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}

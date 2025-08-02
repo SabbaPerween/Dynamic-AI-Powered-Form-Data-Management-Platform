@@ -1,0 +1,186 @@
+{% extends "core/app_base.html" %}
+
+{% block app_content %}
+<div class="app-header">
+    <div>
+        <h1 class="h2"><i class="fas fa-pencil-alt text-primary me-2"></i>Edit Form</h1>
+        <p class="text-muted mb-0">You are directly editing <strong>{{ editing_form.form_name }}</strong>.</p>
+    </div>
+</div>
+
+
+<!-- Main form for submission -->
+<form method="post" id="edit-form">
+    {% csrf_token %}
+
+    <!-- Step 1: Form Details (pre-populated) -->
+    <h4>1. Configure Form Details</h4>
+    <div class="card card-body bg-light mb-3">
+        <div class="mb-3">
+            <label for="id_form_name" class="form-label fw-bold">Form Name</label>
+            {{ form.form_name }}
+        </div>
+        <div class="mb-3">
+            <label for="id_parent_form" class="form-label fw-bold">Link to Parent Form (Optional)</label>
+            {{ form.parent_form }}
+        </div>
+    </div>
+
+    <!-- Step 2: Build Form Fields (same as create form) -->
+    <h4>2. Build Form Fields</h4>
+    <div class="card card-body bg-light mb-3">
+        <h5 class="card-title">Manually Add a Field</h5>
+        <div class="row g-2">
+            <div class="col-md-5">
+                <input type="text" id="manual-field-name" class="form-control" placeholder="Field Name">
+            </div>
+            <div class="col-md-4">
+                <select id="manual-field-type" class="form-select">
+                    <option selected disabled>-- Select Field Type --</option>
+                    <optgroup label="Text">
+                        <option value="VARCHAR(255)">Short Text</option>
+                        <option value="TEXTAREA">Long Text (Text Area)</option>
+                        <option value="EMAIL">Email</option>
+                        <option value="PHONE">Phone</option>
+                        <option value="PASSWORD">Password</option>
+                    </optgroup>
+                    <optgroup label="Numbers">
+                        <option value="INTEGER">Integer</option>
+                        <option value="FLOAT">Decimal (Float)</option>
+                    </optgroup>
+                    <optgroup label="Choices">
+                        <option value="SELECT">Dropdown (Select)</option>
+                        <option value="RADIO">Radio Buttons</option>
+                        <option value="MULTISELECT">Multi-Select</option>
+                        <option value="CHECKBOX">Checkbox</option>
+                    </optgroup>
+                    <optgroup label="Date/Time">
+                        <option value="DATE">Date</option>
+                        <option value="DATETIME">Date & Time</option>
+                    </optgroup>
+                    <!-- NEWLY ADDED SECTION -->
+                    <optgroup label="Files">
+                        <option value="FILE">File Upload</option>
+                    </optgroup>
+                    <!-- END OF NEWLY ADDED SECTION -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="button" id="add-manual-field-btn" class="btn btn-secondary w-100">Add Field</button>
+            </div>
+        </div>
+        <div class="mt-2" id="manual-options-container" style="display: none;">
+             <input type="text" id="manual-field-options" class="form-control" placeholder="Enter options, comma-separated (e.g., Yes, No, Maybe)">
+        </div>
+    </div>
+    
+    <!-- Step 3: Review and Generate -->
+    <h4>3. Review Fields</h4>
+    <div id="fields-container" class="mb-3 border rounded p-3" style="min-height: 100px;"></div>
+
+    <!-- Hidden input to store the final JSON of the fields -->
+    <input type="hidden" name="fields_json" id="fields-json-input">
+
+    <hr>
+    <button type="submit" class="btn btn-primary w-100 fs-5">
+        <i class="fas fa-save"></i> Save as New Version
+    </button>
+</form>
+
+<!-- The JavaScript is almost identical to form_create.html, with ONE key change -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addManualBtn = document.getElementById('add-manual-field-btn');
+    const fieldsContainer = document.getElementById('fields-container');
+    const mainForm = document.getElementById('edit-form');
+    const hiddenJsonInput = document.getElementById('fields-json-input');
+    const manualFieldNameInput = document.getElementById('manual-field-name');
+    const manualFieldTypeSelect = document.getElementById('manual-field-type');
+    const manualOptionsContainer = document.getElementById('manual-options-container');
+    const manualOptionsInput = document.getElementById('manual-field-options');
+    
+    // Initialize the formFields array with the data passed from the view
+    let formFields = JSON.parse('{{ fields_as_json|escapejs }}');
+    
+    function renderFields() {
+        if (formFields.length === 0) {
+            fieldsContainer.innerHTML = '<p class="text-muted">No fields added yet.</p>';
+        } else {
+            fieldsContainer.innerHTML = ''; 
+            formFields.forEach((field, index) => {
+                const fieldDiv = document.createElement('div');
+                fieldDiv.className = 'd-flex align-items-center justify-content-between mb-2 p-2 border rounded bg-white';
+                fieldDiv.innerHTML = `
+                    <div>
+                        <i class="fas fa-grip-vertical me-2 text-muted"></i>
+                        <strong>${field.name}</strong> <span class="badge bg-secondary">${field.type}</span>
+                        ${field.options ? `<br><small class="text-muted">Options: ${field.options.join(', ')}</small>` : ''}
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeField(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                fieldsContainer.appendChild(fieldDiv);
+            });
+        }
+    }
+
+    manualFieldTypeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        const needsOptions = ['SELECT', 'RADIO', 'MULTISELECT','CHECKBOX'];
+        if (needsOptions.includes(selectedType)) {
+            manualOptionsContainer.style.display = 'block';
+        } else {
+            manualOptionsContainer.style.display = 'none';
+        }
+    });
+
+    addManualBtn.addEventListener('click', function() {
+        const name = manualFieldNameInput.value.trim();
+        const type = manualFieldTypeSelect.value;
+
+        if (!name || type === '-- Select Field Type --') {
+            alert('Please enter a field name and select a type.');
+            return;
+        }
+        
+        const newField = { name: name, type: type };
+        
+        const needsOptions = ['SELECT', 'RADIO', 'MULTISELECT','CHECKBOX'];
+        if (needsOptions.includes(type)) {
+            const options = manualOptionsInput.value.split(',').map(opt => opt.trim()).filter(Boolean);
+            if (options.length < 2) {
+                alert('Please provide at least two comma-separated options for this field type.');
+                return;
+            }
+            newField.options = options;
+        }
+
+        formFields.push(newField);
+        renderFields();
+
+        manualFieldNameInput.value = '';
+        manualOptionsInput.value = '';
+        manualFieldTypeSelect.selectedIndex = 0;
+        manualOptionsContainer.style.display = 'none';
+    });
+    
+    window.removeField = function(index) {
+        formFields.splice(index, 1); 
+        renderFields();
+    }
+
+    mainForm.addEventListener('submit', function(e) {
+        if (formFields.length === 0) {
+            alert('Cannot save a form with no fields.');
+            e.preventDefault(); 
+            return;
+        }
+        hiddenJsonInput.value = JSON.stringify(formFields);
+    });
+
+    // Initial Render: Call renderFields once at the start to display the initial fields
+    renderFields();
+});
+</script>
+{% endblock %}

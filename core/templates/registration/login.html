@@ -1,0 +1,105 @@
+{% extends "core/base.html" %}
+
+{% block title %}Login to Your Account{% endblock %}
+
+{% block content %}
+<style>
+    .auth-section {
+        background-color: #F7FAFC;
+        padding: 4rem 0;
+    }
+    .auth-card {
+        background-color: #FFF;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        overflow: hidden; /* Important for the header */
+    }
+    .auth-card-header {
+        background-color: #1A202C; /* Dark charcoal header */
+        color: #FFF;
+        padding: 2rem;
+        text-align: center;
+    }
+    .auth-card-header h3 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .auth-card-header .fa-sign-in-alt {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: block;
+        color: #4FD1C5; /* Teal icon */
+    }
+    .auth-card .form-floating label {
+        color: #A0AEC0; /* Lighter text for placeholder */
+    }
+    .auth-card .btn-primary {
+        background-color: #4FD1C5;
+        border-color: #4FD1C5;
+        font-weight: 600;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    .auth-card .btn-primary:hover {
+        background-color: #38B2AC;
+        border-color: #38B2AC;
+        transform: translateY(-2px);
+    }
+    .auth-card-footer {
+        background-color: #EDF2F7;
+    }
+</style>
+
+<div class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <div class="auth-card">
+                    <div class="auth-card-header">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <h3>Welcome Back</h3>
+                        <p class="text-muted small mb-0">Sign in to continue to your dashboard.</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post">
+                            {% csrf_token %}
+
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {% for error in form.non_field_errors %}
+                                        <p class="mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="form-floating mb-3">
+                                <input type="text" name="username" id="id_username" class="form-control" placeholder="Username" required>
+                                <label for="id_username">Username</label>
+                            </div>
+
+                            <div class="form-floating mb-4">
+                                <input type="password" name="password" id="id_password" class="form-control" placeholder="Password" required>
+                                <label for="id_password">Password</label>
+                            </div>
+                            
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <a class="small text-muted" href="{% url 'password_reset_request' %}">Forgot Password?</a>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Sign In</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center py-3 auth-card-footer">
+                        <div class="small">
+                            <a href="{% url 'register' %}">Need an account? Sign up!</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

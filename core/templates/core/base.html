@@ -1,0 +1,182 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Form Platform{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- ==================== CUSTOM CSS FOR LAYOUT ==================== -->
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+            background-color: #f4f7f6; /* A light grey background for the content area */
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+        }
+
+        /* The new sidebar */
+        #sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: #2c3e50; /* A dark sidebar color */
+            color: #fff;
+            transition: all 0.3s;
+        }
+
+        #sidebar .sidebar-header {
+            padding: 20px;
+            background: #34495e;
+            text-align: center;
+        }
+        
+        #sidebar .sidebar-header h3 {
+            color: #fff;
+            margin: 0;
+        }
+
+        #sidebar .list-unstyled {
+            padding: 20px 0;
+            border-bottom: 1px solid #47748b;
+        }
+
+        /* Styling for the sidebar links */
+        .sidebar-link {
+            display: block;
+            width: 100%;
+            text-decoration: none;
+            color: #adb5bd;
+            padding: 10px 30px;
+            font-size: 1.1em;
+            transition: all 0.2s;
+        }
+
+        .sidebar-link:hover {
+            color: #fff;
+            background: #34495e;
+        }
+        
+        .sidebar-link .fa-fw {
+            margin-right: 10px;
+        }
+        
+        /* The main content area */
+        #main-content {
+            flex-grow: 1; /* Takes up the remaining space */
+            padding: 2rem;
+            width: 100%;
+        }
+    </style>
+    <!-- =============================================================== -->
+</head>
+<body>
+    <!-- Top navigation bar (we can simplify this or keep it) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-file-alt"></i> Form Platform
+            </a>
+            <div class="ms-auto">
+                {% if user.is_authenticated %}
+                    <span class="navbar-text me-3">
+                        Welcome, {{ user.username }} ({{ user.get_role_display }})
+                    </span>
+                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-light">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-light me-2">Login</a>
+                    <a href="{% url 'register' %}" class="btn btn-primary">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <div class="main-container">
+        <!-- ==================== SIDEBAR HTML ==================== -->
+        {% if user.is_authenticated %}
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>Navigation</h3>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="{% url 'dashboard' %}" class="sidebar-link">
+                        <i class="fas fa-tachometer-alt fa-fw"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'form_create' %}" class="sidebar-link">
+                        <i class="fas fa-plus-square fa-fw"></i>
+                        Create Form
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'internal_form_fill' %}" class="sidebar-link">
+                        <i class="fas fa-edit fa-fw"></i>
+                        Fill a Form
+                    </a>
+                </li>
+                <li> <!-- ADD THIS NEW LINK -->
+                    <a href="{% url 'my_submissions' %}" class="sidebar-link">
+                        <i class="fas fa-history fa-fw"></i>
+                        My Submissions
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'manage_form_hierarchy' %}" class="sidebar-link">
+                        <i class="fas fa-layer-group fa-fw"></i>
+                        Manage Hierarchy
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'manage_relationships' %}" class="sidebar-link">
+                        <i class="fas fa-link fa-fw"></i>
+                        Manage Relationships
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+        <!-- ====================================================== -->
+        
+        <!-- ==================== MAIN CONTENT WRAPPER ==================== -->
+        <div id="main-content">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% block content %}
+            <!-- The content from other pages like home.html or dashboard.html will be injected here -->
+            {% endblock %}
+        </div>
+        <!-- ============================================================== -->
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block javascript %}
+    {# Page-specific JavaScript will be injected here #}
+    {% endblock %}
+</body>
+</html>

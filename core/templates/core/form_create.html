@@ -1,0 +1,260 @@
+{% extends "core/app_base.html" %}
+{% comment %} {% extends "base.html" %} {% endcomment %}
+{% block app_content %}
+    <div class="app-header">
+        <h1><i class="fas fa-plus-square text-primary me-2"></i>Create a New Form</h1>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <p class="card-subtitle mb-4 text-muted">Design your form manually or use our AI assistant to get started quickly.</p>
+{% comment %} {% block title %}Create a New Form{% endblock %}
+
+{% block content %}
+<h2><i class="fas fa-file-signature"></i> Create a New Form</h2>
+<p>Design your form manually or use our AI assistant to get started quickly.</p>
+<hr> {% endcomment %}
+
+<!-- Main form for submission -->
+<form method="post" id="create-form">
+    {% csrf_token %}
+
+    <!-- Step 1: Form Details -->
+    <h4>1. Configure Form Details</h4>
+    <div class="card card-body bg-light mb-3" style="border-style: dashed;">
+        <div class="mb-3">
+            <label for="id_form_name" class="form-label fw-bold">Form Name</label>
+            {{ form.form_name }}
+        </div>
+        <div class="mb-3">
+            <label for="id_parent_form" class="form-label fw-bold">Link to Parent Form (Optional)</label>
+            {{ form.parent_form }}
+        </div>
+    </div>
+
+    <!-- Step 2: Build Form Fields -->
+    <h4>2. Build Form Fields</h4>
+    
+    <!-- AI Generator -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">✨ Use AI to Generate Fields (Optional)</h5>
+            <div class="mb-3">
+                <label for="ai-description" class="form-label">Describe the form you want:</label>
+                <textarea id="ai-description" class="form-control" rows="3" placeholder="e.g., A student registration form with name, age, grade, and an emergency contact number."></textarea>
+            </div>
+            <button type="button" id="generate-ai-btn" class="btn btn-info">Generate Fields with AI</button>
+        </div>
+    </div>
+
+    <!-- Manual Field Adder -->
+    <div class="card card-body bg-light mb-3">
+        <h5 class="card-title">Manually Add a Field</h5>
+        <div class="row g-2">
+            <div class="col-md-5">
+                <input type="text" id="manual-field-name" class="form-control" placeholder="Field Name (e.g., 'Full Name')">
+            </div>
+            <div class="col-md-4">
+                <select id="manual-field-type" class="form-select">
+                    <option selected disabled>-- Select Field Type --</option>
+                    <optgroup label="Text">
+                        <option value="VARCHAR(255)">Short Text</option>
+                        <option value="TEXTAREA">Long Text (Text Area)</option>
+                        <option value="EMAIL">Email</option>
+                        <option value="PHONE">Phone</option>
+                        <option value="PASSWORD">Password</option>
+                    </optgroup>
+                    <optgroup label="Numbers">
+                        <option value="INTEGER">Integer</option>
+                        <option value="FLOAT">Decimal (Float)</option>
+                    </optgroup>
+                    <optgroup label="Choices">
+                        <option value="SELECT">Dropdown (Select)</option>
+                        <option value="RADIO">Radio Buttons</option>
+                        <option value="MULTISELECT">Multi-Select</option>
+                        <option value="CHECKBOX">Checkbox</option>
+                    </optgroup>
+                    <optgroup label="Date/Time">
+                        <option value="DATE">Date</option>
+                        <option value="DATETIME">Date & Time</option>
+                    </optgroup>
+                    <!-- NEWLY ADDED SECTION -->
+                    <optgroup label="Files">
+                        <option value="FILE">File Upload</option>
+                    </optgroup>
+                    <!-- END OF NEWLY ADDED SECTION -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="button" id="add-manual-field-btn" class="btn btn-secondary w-100">
+                    <i class="fas fa-plus"></i> Add Field
+                </button>
+            </div>
+        </div>
+        <div class="mt-2" id="manual-options-container" style="display: none;">
+            <input type="text" id="manual-field-options" class="form-control" placeholder="Enter options, comma-separated (e.g., Yes, No, Maybe)">
+        </div>
+    </div>
+    
+    <!-- Step 3: Review and Generate -->
+    <h4>3. Review & Generate</h4>
+    <p>Here are the fields that will be included in your new form.</p>
+    <div id="fields-container" class="mb-3 border rounded p-3" style="min-height: 100px;">
+        <p class="text-muted">No fields added yet. Use the AI generator or add fields manually.</p>
+    </div>
+
+    <!-- Hidden input to store the final JSON of the fields -->
+    <input type="hidden" name="fields_json" id="fields-json-input">
+
+    <hr>
+    <button type="submit" class="btn btn-primary w-100 fs-5">
+        <i class="fas fa-check-circle"></i> Create Form and Database Table
+    </button>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Element References
+    const generateAiBtn = document.getElementById('generate-ai-btn');
+    const aiDescriptionInput = document.getElementById('ai-description');
+    
+    const addManualBtn = document.getElementById('add-manual-field-btn');
+    const manualFieldNameInput = document.getElementById('manual-field-name');
+    const manualFieldTypeSelect = document.getElementById('manual-field-type');
+    const manualOptionsContainer = document.getElementById('manual-options-container');
+    const manualOptionsInput = document.getElementById('manual-field-options');
+
+    const fieldsContainer = document.getElementById('fields-container');
+    const mainForm = document.getElementById('create-form');
+    const hiddenJsonInput = document.getElementById('fields-json-input');
+
+    // State
+    let formFields = []; // This array is the single source of truth for the fields
+
+    // --- RENDER FUNCTION ---
+    // This function redraws the list of fields based on the formFields array
+    function renderFields() {
+        if (formFields.length === 0) {
+            fieldsContainer.innerHTML = '<p class="text-muted">No fields added yet. Use the AI generator or add fields manually.</p>';
+            return;
+        }
+
+        fieldsContainer.innerHTML = ''; // Clear current fields
+        formFields.forEach((field, index) => {
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'd-flex align-items-center justify-content-between mb-2 p-2 border rounded bg-white';
+            fieldDiv.innerHTML = `
+                <div>
+                    <i class="fas fa-grip-vertical me-2 text-muted"></i>
+                    <strong>${field.name}</strong> <span class="badge bg-secondary">${field.type}</span>
+                    ${field.options ? `<br><small class="text-muted">Options: ${field.options.join(', ')}</small>` : ''}
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeField(${index})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            fieldsContainer.appendChild(fieldDiv);
+        });
+    }
+
+    // --- EVENT HANDLERS ---
+
+    // Make the options input visible when a choice-based type is selected
+    manualFieldTypeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        const needsOptions = ['SELECT', 'RADIO', 'MULTISELECT','CHECKBOX'];
+        if (needsOptions.includes(selectedType)) {
+            manualOptionsContainer.style.display = 'block';
+        } else {
+            manualOptionsContainer.style.display = 'none';
+        }
+    });
+
+    // Handle adding a field manually
+    addManualBtn.addEventListener('click', function() {
+        const name = manualFieldNameInput.value.trim();
+        const type = manualFieldTypeSelect.value;
+
+        if (!name || type === '-- Select Field Type --') {
+            alert('Please enter a field name and select a type.');
+            return;
+        }
+        
+        const newField = { name: name, type: type };
+        
+        const needsOptions = ['SELECT', 'RADIO', 'MULTISELECT','CHECKBOX'];
+        if (needsOptions.includes(type)) {
+            const options = manualOptionsInput.value.split(',').map(opt => opt.trim()).filter(Boolean);
+            if (options.length < 2) {
+                alert('Please provide at least two comma-separated options for this field type.');
+                return;
+            }
+            newField.options = options;
+        }
+
+        formFields.push(newField);
+        renderFields();
+
+        // Reset inputs
+        manualFieldNameInput.value = '';
+        manualOptionsInput.value = '';
+        manualFieldTypeSelect.selectedIndex = 0;
+        manualOptionsContainer.style.display = 'none';
+    });
+
+    // Handle AI generation
+    generateAiBtn.addEventListener('click', async function() {
+        const description = aiDescriptionInput.value;
+        if (!description) {
+            alert('Please enter a description for the AI.');
+            return;
+        }
+        
+        generateAiBtn.disabled = true;
+        generateAiBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Generating...';
+
+        try {
+            const response = await fetch("{% url 'api_generate_fields' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ description: description })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'AI generation failed');
+            }
+
+            const data = await response.json();
+            formFields = data.fields; // Replace current fields
+            renderFields();
+
+        } catch (error) {
+            alert('Error: ' + error.message);
+        } finally {
+            generateAiBtn.disabled = false;
+            generateAiBtn.innerHTML = 'Generate Fields with AI';
+        }
+    });
+    
+    // Make the removeField function available globally so the inline onclick can find it
+    window.removeField = function(index) {
+        formFields.splice(index, 1); // Remove the field from the array
+        renderFields(); // Re-render the list
+    }
+
+    // Before the form submits, update the hidden input
+    mainForm.addEventListener('submit', function(e) {
+        if (formFields.length === 0) {
+            alert('Cannot create a form with no fields. Please add at least one field.');
+            e.preventDefault(); // Stop the form from submitting
+            return;
+        }
+        hiddenJsonInput.value = JSON.stringify(formFields);
+    });
+});
+</script>
+{% endblock %}
