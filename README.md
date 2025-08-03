@@ -1,5 +1,4 @@
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/user-attachments/assets/e1a5f4e8-8797-40b8-936d-14c1960298e3" alt="Project Logo" width="100"/><br/>
   Dynamic Form Generator & Analytics Platform
 </h1>
 
