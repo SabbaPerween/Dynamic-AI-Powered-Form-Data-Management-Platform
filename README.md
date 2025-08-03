@@ -1,242 +1,183 @@
 <h1 align="center">
-  <img src="https://via.placeholder.com/100x100.png?text=DFG" alt="Project Logo" width="100"/><br/>
+  <img src="https://raw.githubusercontent.com/user-attachments/assets/e1a5f4e8-8797-40b8-936d-14c1960298e3" alt="Project Logo" width="100"/><br/>
   Dynamic Form Generator & Analytics Platform
 </h1>
 
 <p align="center">
-  <strong>A full-stack Django application for creating, managing, and analyzing complex, dynamic forms with an advanced, aesthetic UI.</strong>
+  <strong>A comprehensive Django-based web application for creating, managing, and analyzing complex, dynamic forms with an advanced, aesthetic UI.</strong>
 </p>
 
 <p align="center">
-  <a href="#-key-features">Key Features</a> •
-  <a href="#-architecture-overview">Architecture</a> •
-  <a href="#-tech-stack">Tech Stack</a> •
-  <a href="#-local-development-setup">Setup</a> •
-  <a href="#-application-workflow">Usage Guide</a> •
-  <a href="#-api-endpoints">API</a> •
-  <a href="#-contributing">Contributing</a>
+  <img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python Version">
+  <img src="https://img.shields.io/badge/Django-5.2-green.svg" alt="Django Version">
+  <img src="https://img.shields.io/badge/Database-PostgreSQL-blue.svg" alt="Database">
+  <img src="https://img.shields.io/badge/License-MIT-lightgrey.svg" alt="License">
+</p>
+
+<p align="center">
+  <a href="#-project-philosophy">Project Philosophy</a> •
+  <a href="#-core-features">Core Features</a> •
+  <a href="#-system-architecture">Architecture</a> •
+  <a href="#-technology-stack">Tech Stack</a> •
+  <a href="#-local-development-setup">Setup Guide</a> •
+  <a href="#-troubleshooting">Troubleshooting</a> •
+  <a href="#-future-work">Future Work</a>
 </p>
 
 ---
 
-This project provides a robust solution for scenarios where form structures are not static. It replaces the need for creating new database tables for every form type by using a flexible EAV (Entity-Attribute-Value) model. Key functionalities include a drag-and-drop form builder, AI-powered field generation, complex data relationship modeling, and a built-in analytics dashboard, all wrapped in a modern, command-center-style interface.
+## Overview
 
-## ✨ Key Features
+This project solves the challenge of creating and managing custom data collection forms in a secure, multi-user environment. It moves beyond static forms by providing a complete lifecycle management tool: from AI-assisted creation and a drag-and-drop builder to a powerful administrative backend for data filtering, visualization, and export.
+
+## 🏛️ Project Philosophy
+
+The development of this platform is guided by four core principles:
+
+1.  **Security First:** Every feature, from authentication to database interaction, is designed with security as the foremost priority. We leverage Django's built-in security features for protection against CSRF, XSS, and SQL injection, supplemented with a custom OTP-based password reset flow.
+2.  **Seamless User Experience:** The interface is designed to be intuitive for all user roles. Complex actions like form creation or data analysis are presented in a clean, aesthetic "command center" UI that feels like a native application.
+3.  **Flexible & Scalable Architecture:** The EAV (Entity-Attribute-Value) database schema is designed to handle an infinite number of form variations without requiring database schema changes, ensuring long-term scalability and maintainability.
+4.  **Developer-Friendly & Maintainable:** With a clear separation of concerns, comprehensive documentation, and adherence to Django best practices, the codebase is easy to understand, maintain, and extend.
+
+## ✨ Core Features
 
 <details>
-  <summary><strong>📝 Dynamic Form Creation</strong></summary>
+  <summary><strong>👤 User & Access Management</strong></summary>
   
-  - **Drag-and-Drop UI:** Powered by `SortableJS`, users can intuitively reorder form fields.
-  - **AI Field Generation:** Leverages a local Ollama instance to interpret natural language descriptions (e.g., "a patient intake form") and generate a complete JSON field structure.
-  - **Rich Field Type Support:** Includes standard inputs (Text, Email, Number), choice-based fields (Select, Radio, Checkbox, Multi-Select), date/time pickers, and file uploads.
-  - **No Database Migrations Required:** Adding, removing, or changing form fields does not require `makemigrations` or `migrate`, enabling true on-the-fly form editing.
+  - **Secure Authentication:** Comprehensive login, registration, and password reset system using Django's robust authentication framework.
+  - **OTP Password Reset:** Secure, time-sensitive One-Time Password (OTP) system delivered via SMTP for password recovery.
+  - **Role-Based Access Control (RBAC):**
+    - **Admin:** Full control over all forms, data, and users.
+    - **Editor:** Can create forms and manage permissions for them.
+    - **Viewer:** Can only view and submit data to assigned forms.
+  - **Per-Form Permissions:** Form creators can grant specific `view`, `edit`, or `admin` access to other users on a per-form basis.
 </details>
 
 <details>
-  <summary><strong>🔗 Advanced Data Modeling</strong></summary>
+  <summary><strong>📝 Form Lifecycle Management</strong></summary>
   
-  - **Parent-Child Form Hierarchies:** A form can be designated as a child of another (e.g., `Student Form` -> `School Form`), enforcing relational data entry.
-  - **Record-to-Record Relationships:** Users can create explicit links between individual submissions from different child forms (e.g., linking `Teacher A` to `Student B` and `Student C` within the context of `School X`). This allows for creating complex data graphs.
+  - **Drag-and-Drop Form Builder:** Powered by `SortableJS`, users can intuitively create and reorder form fields.
+  - **AI-Powered Field Generation:** Describe a form's purpose in natural language (e.g., "a patient intake form") and have the AI (Ollama/Llama2) instantly generate the corresponding JSON field structure.
+  - **Dynamic Schema:** Creating a form does not alter the database schema, allowing for true on-the-fly form creation and editing.
+  - **Advanced Form Relationships:**
+    - **Parent-Child Links:** Establish hierarchies between forms (e.g., link "Students" to a "School").
+    - **Child-to-Child Links:** Create relationships between records from different child forms under the same parent (e.g., link a "Teacher" record to a "Student" record).
 </details>
 
 <details>
-  <summary><strong>📊 Data Management & Analytics</strong></summary>
-  
-  - **Centralized Submission Viewing:** All form submissions are displayed in a clean, searchable, and paginated table.
-  - **Public & Internal Data Entry:** Collect data via shareable public URLs or a secure internal interface for authenticated users.
-  - **Automated Analytics Dashboard:** Submission data is automatically visualized with Plotly charts. The system intelligently selects the chart type (e.g., pie charts for `SELECT` fields, histograms for `INTEGER` fields).
-  - **Versatile Data Export:** Submissions can be exported in **CSV**, **Excel (XLSX)**, and **PDF** formats.
+  <summary><strong>📊 Data Intelligence & Sharing</strong></summary>
+
+  - **Public Sharing:** Generate unique, secure URLs to share forms publicly for data collection from unauthenticated users.
+  - **Interactive Analytics Dashboard:**
+    - Visualize data with interactive charts and graphs from **Plotly**.
+    - View Key Performance Indicators (KPIs) like total submissions.
+  - **Data Export:** Download filtered submission data in **CSV**, **PDF**, and **Excel** formats.
+  - **Powerful Search:** Full-text search within all submissions for a given form.
 </details>
 
-<details>
-  <summary><strong>🔐 User & Permission System</strong></summary>
-  
-  - **Custom User Model:** Extends Django's `AbstractUser` to include roles (`Admin`, `Editor`, `Viewer`).
-  - **Per-Form Access Control:** A dedicated `FormPermission` model allows form owners to grant granular `view`, `edit`, or `admin` permissions to other users on a per-form basis.
-  - **OTP-Based Password Reset:** A secure, custom password reset flow using One-Time Passwords sent via email.
-</details>
+## 🏗️ System Architecture
 
-<details>
-  <summary><strong>🎨 Modern User Interface</strong></summary>
-  
-  - **Command Center Dashboard:** A two-column, app-like layout for all authenticated views provides a seamless user experience.
-  - **Aesthetic Public Pages:** A fully custom, professional landing page and styled login/registration forms.
-  - **Enhanced Admin Panel:** The default Django Admin is themed with **Django Jazzmin** for a modern, responsive, and feature-rich administrative backend.
-</details>
+The application is built on a flexible **Entity-Attribute-Value (EAV)** model to avoid the rigid and unscalable approach of creating a new database table for each form.
 
----
+*   **`core.Form`**: Stores the metadata of a form. The `fields` attribute is a `JSONField` that holds the entire structure (field names, types, options, order).
+*   **`core.FormSubmission`**: A single entry representing one submission of a form. It acts as a container linking the `Form`, the `User` (if authenticated), and all its related data.
+*   **`core.SubmissionData`**: The EAV table. Each row stores a single piece of data for a submission (`submission_id`, `field_name`, `field_value`). This design allows for infinite form structures without database migrations.
 
-## 🏛️ Architecture Overview
+For a detailed technical blueprint, including the database schema and component responsibilities, please see the `core/models.py` file.
 
-The application's core architecture is designed for maximum flexibility, avoiding the anti-pattern of creating a new database table for each form.
+## 💻 Technology Stack
 
-*   **`Form` Model:** Stores the metadata for a form, including its name, status, and most importantly, a `JSONField` named `fields`. This JSON object defines the structure (field names, types, options) of the form.
-*   **`FormSubmission` Model:** Represents a single instance of a form being filled out. It acts as a container, linking to the `Form` it belongs to and the user who submitted it.
-*   **`SubmissionData` (EAV Model):** This is the heart of the dynamic system. Instead of columns, it stores data in rows, with each row representing a single field from a single submission. It has three key columns:
-    1.  `submission` (ForeignKey to `FormSubmission`)
-    2.  `field_name` (e.g., "Full Name")
-    3.  `field_value` (e.g., "John Doe")
-    This Entity-Attribute-Value (EAV) structure allows for infinite form variations without altering the database schema.
+| Category      | Technology                                    |
+|---------------|-----------------------------------------------|
+| **Backend**   | Python 3.11+, Django 5.2+                     |
+| **Database**  | PostgreSQL                                    |
+| **Frontend**  | HTML5, Bootstrap 5, JavaScript (ES6+)         |
+| **JS Libs**   | SortableJS, Plotly.js                         |
+| **Admin**     | Django Jazzmin                                |
+| **AI**        | Ollama (Llama 2)                              |
+| **Data Tools**| Pandas, FPDF, OpenPyXL                        |
+| **Security**  | Django Authentication & CSRF Protection       |
 
----
+## 🚀 Local Development Setup
 
-## 🛠️ Tech Stack
-
-| Category      | Technology                                    | Purpose                                       |
-|---------------|-----------------------------------------------|-----------------------------------------------|
-| **Backend**   | Python 3.11+, Django 5.2+                     | Core application framework                    |
-| **Database**  | PostgreSQL                                    | Relational data storage                       |
-| **Frontend**  | HTML5, Bootstrap 5, JavaScript (ES6+)         | UI structure and styling                      |
-| **JS Libs**   | SortableJS, Plotly.js                         | Drag-and-drop, data visualization         |
-| **Admin**     | Django Jazzmin                                | Modern, responsive admin theme                |
-| **AI**        | Ollama (running `llama2` model)               | Natural language to form-field generation     |
-| **Async**     | `asgiref`                                     | ASGI compatibility for Django                 |
-| **Tooling**   | `python-decouple`, `psycopg2-binary`          | Environment variables, DB connectivity        |
-
----
-
-## ⚙️ Local Development Setup
+Follow these instructions to set up and run the project locally.
 
 ### 1. Prerequisites
+- Python 3.9+
+- PostgreSQL (v12 or higher)
+- Ollama installed and serving a model (e.g., `ollama run llama2`) --- (it's optional if you want to use AI than you have to do it otherwise leave it)
 
--   **Python 3.11+** and `pip`.
--   **PostgreSQL:** A running instance is required.
--   **Git:** For cloning the repository.
--   **Ollama (Optional):** Required for the AI form generation feature. [Download from ollama.com](https://ollama.com/).
+### 2. Clone the Repository
+```bash
+git clone <your-repository-url>
+cd <repository-folder>
+```
 
-### 2. Environment Configuration
+### 3. Create a Virtual Environment
+```bash
+# For MacOS/Linux
+python3 -m venv venv
+source venv/bin/activate
 
+# For Windows
+python -m venv venv
+.\venv\Scripts\activate
+```
+### 4. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+* This command reads requirements.txt and installs all the necessary Python libraries into your active virtual environment.
+
+### 5. Configure Environment Variables
+Create a file named .env in the root of your project and add the following, replacing the placeholder values:
+
+```bash
+# --- DATABASE CONFIGURATION ---
+DB_NAME=dynamic_forms_db
+DB_USER=your_postgres_user
+DB_PASSWORD=your_super_secret_password
+DB_HOST=localhost
+DB_PORT=5432
+
+# --- SMTP EMAIL CONFIGURATION (for Password Reset) ---
+# For Gmail, you MUST use a 16-digit "App Password".
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+SENDER_USER=your.email@gmail.com
+SENDER_PASSWORD=your_gmail_app_password
+```
+
+### 6. Set Up the Database and Run
+```bash
+# Apply the database schema
+python manage.py migrate
+
+# Create your first admin user
+python manage.py createsuperuser
+
+# Start the application
+python manage.py runserver
+```
+Navigate to http://localhost:8000 in your web browser to see the application.
+
+### 🚨 Troubleshooting
 <details>
-  <summary>Click to expand configuration steps</summary>
-  
-  1.  **Clone the Repository:**
-      ```bash
-      git clone https://github.com/your-username/your-repo-name.git
-      cd your-repo-name
-      ```
-
-  2.  **Set up Virtual Environment:**
-      ```bash
-      # Create
-      python -m venv venv
-      # Activate
-      # Windows: .\venv\Scripts\activate
-      # macOS/Linux: source venv/bin/activate
-      ```
-
-  3.  **Install Dependencies:**
-      ```bash
-      pip install -r requirements.txt
-      ```
-
-  4.  **Configure Environment Variables:**
-      -   Create a file named `.env` in the project's root directory.
-      -   Populate it with your local configuration. Use the following as a template:
-      ```dotenv
-      # --- .env file ---
-      # Django Secret Key (generate a new one for production)
-      SECRET_KEY="your-secret-key-here"
-
-      # Database (PostgreSQL)
-      DB_NAME=dynamic_forms_db
-      DB_USER=postgres
-      DB_PASSWORD=your_postgres_password
-      DB_HOST=localhost
-      DB_PORT=5432
-
-      # Email (for OTP Password Reset)
-      # Note: Use an App Password for Gmail/Outlook
-      SMTP_SERVER=smtp.gmail.com
-      SMTP_PORT=587
-      SENDER_USER=your.email@example.com
-      SENDER_PASSWORD=your_16_digit_app_password
-      ```
-
+<summary>Common setup issues and solutions.</summary>
+PostgreSQL Connection Error: Double-check that your .env credentials are correct and that the PostgreSQL server is running.
+TemplateDoesNotExist: This usually means a template file is in the wrong directory. Ensure all auth-related templates are in core/templates/registration/ and app pages are in core/templates/core/. Restarting the server after adding new files can also help.
+Password Reset Email Fails: If you see an SMTPAuthenticationError, especially with Gmail, it almost certainly means you need to use a 16-digit App Password, not your regular account password.
+Admin Panel AlreadyRegistered Error: This error means a model is being registered twice in core/admin.py. Use the @admin.register() decorator OR admin.site.register(), but not both for the same model.
 </details>
 
-### 3. Database and Application Initialization
+### 🔮 Future Work
+This platform provides a solid foundation. Future enhancements could include:
 
-<details>
-  <summary>Click to expand initialization steps</summary>
-  
-  1.  **Prepare PostgreSQL:**
-      -   Ensure your PostgreSQL service is running.
-      -   Create a new database matching the `DB_NAME` in your `.env` file.
+* REST API: Expose an API for programmatic form submission and data retrieval.
+* Pagination: Implement pagination on the Form Detail page for forms with thousands of submissions.
+* AJAX Integration: Use AJAX for searching and permissions to avoid full page reloads.
+* Advanced Reporting: Create a dedicated report builder with scheduled email delivery.
+* Containerization: Provide Dockerfile and docker-compose.yml for easy deployment.
 
-  2.  **Run Database Migrations:**
-      -   This command will create all the necessary tables based on `core/models.py`.
-      ```bash
-      python manage.py migrate
-      ```
-
-  3.  **Create a Superuser:**
-      -   This account will have access to the Django Admin panel.
-      ```bash
-      python manage.py createsuperuser
-      ```
-
-  4.  **Initialize AI Model (Optional):**
-      -   If Ollama is running, pull the required model from the command line:
-      ```bash
-      ollama pull llama2
-      ```
-
-</details>
-
-### 4. Running the Server
-
--   Start the Django development server:
-    ```bash
-    python manage.py runserver
-    ```
--   The application is now accessible at `http://127.0.0.1:8000/`.
--   The admin panel is at `http://127.0.0.1:8000/admin/`.
-
----
-
-## 🗺️ Application Workflow
-
-A quick guide on using the primary features of the application.
-
-<details>
-  <summary><strong>Step 1: Creating a Form</strong></summary>
-  
-  -   Navigate to the **Dashboard** -> **Create Form**.
-  -   **Option A (AI):** Type a description like "A form to sign up for a company event" into the AI text area and click "Generate".
-  -   **Option B (Manual):** Use the "Manually Add a Field" section to add fields one by one.
-  -   **Reorder:** Drag and drop the generated fields into your desired order using the grip handle.
-  -   Click **Create Form**.
-</details>
-
-<details>
-  <summary><strong>Step 2: Collecting Data</strong></summary>
-  
-  -   Go to the **Form Detail** page for your newly created form.
-  -   **Option A (Public):** Copy the **Public Share Link** and send it to anyone. They can submit the form without an account.
-  -   **Option B (Internal):** Navigate to the **Fill a Form** page, select your form, and enter data as an authenticated user.
-</details>
-
-<details>
-  <summary><strong>Step 3: Analyzing and Exporting</strong></summary>
-  
-  -   On the **Form Detail** page, view all submissions. Use the search bar to filter results.
-  -   Click **View Analytics** to see a dashboard of charts visualizing the data.
-  -   Use the **Export** buttons (CSV, Excel, PDF) on the detail page to download the raw data.
-</details>
-
----
-
-## 🔌 API Endpoints
-
-The application exposes a few internal API endpoints to support its dynamic frontend.
-
-| Method | Endpoint                             | Description                                            | Auth Required |
-|--------|--------------------------------------|--------------------------------------------------------|---------------|
-| `POST` | `/api/generate-fields/`              | Takes a JSON `{ "description": "..." }` and returns a JSON field structure. | Yes           |
-| `GET`  | `/api/admin/get-child-submissions/`  | Fetches child submissions for use in admin dropdowns.  | Yes (Admin)   |
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to fork the repository, make changes, and submit a pull request. For major changes, please open an issue first to discuss what you would like to change.
+### 📄 License
+This project is licensed under the MIT License.
