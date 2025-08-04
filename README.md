@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/License-MIT-lightgrey.svg" alt="License">
 </p>
 
-<p align="center">
+
   - **[🏛️ Project Philosophy](#-project-philosophy)**
 - **[✨ Core Features](#-core-features)**
 - **[🏗️ System Architecture](#-system-architecture)**
@@ -22,7 +22,6 @@
 - **[🚨 Troubleshooting](#-troubleshooting)**
 - **[🔮 Future Work](#-future-work)**
 - **[📄 License](#-license)**
-</p>
 
 ---
 
