@@ -77,39 +77,3 @@ class ChildRelationshipForm(forms.ModelForm):
                     parent_submission=parent_instance,
                     form=self.instance.target_submission.form
                 )
-class PasswordResetRequestForm(forms.Form):
-    email = forms.EmailField(
-        label="Your Email Address",
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter your email'})
-    )
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if not CustomUser.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError("No user is associated with this email address.")
-        return email
-
-class OTPVerifyForm(forms.Form):
-    otp = forms.CharField(
-        label="OTP",
-        max_length=6,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter 6-digit OTP'})
-    )
-
-class SetNewPasswordForm(forms.Form):
-    new_password1 = forms.CharField(
-        label="New Password",
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
-    )
-    new_password2 = forms.CharField(
-        label="Confirm New Password",
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
-    )
-
-    def clean(self):
-        cleaned_data = super().clean()
-        new_password1 = cleaned_data.get("new_password1")
-        new_password2 = cleaned_data.get("new_password2")
-        if new_password1 and new_password2 and new_password1 != new_password2:
-            raise forms.ValidationError("The two password fields didn't match.")
-        return cleaned_data

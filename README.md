@@ -14,26 +14,27 @@
 </p>
 
 <p align="center">
-  <a href="#-project-philosophy">Project Philosophy</a> •
-  <a href="#-core-features">Core Features</a> •
-  <a href="#-system-architecture">Architecture</a> •
-  <a href="#-technology-stack">Tech Stack</a> •
-  <a href="#-local-development-setup">Setup Guide</a> •
-  <a href="#-troubleshooting">Troubleshooting</a> •
-  <a href="#-future-work">Future Work</a>
+  - **[🏛️ Project Philosophy](#-project-philosophy)**
+- **[✨ Core Features](#-core-features)**
+- **[🏗️ System Architecture](#-system-architecture)**
+- **[💻 Technology Stack](#-technology-stack)**
+- **[🚀 Local Development Setup](#-local-development-setup)**
+- **[🚨 Troubleshooting](#-troubleshooting)**
+- **[🔮 Future Work](#-future-work)**
+- **[📄 License](#-license)**
 </p>
 
 ---
 
 ## Overview
 
-This project solves the challenge of creating and managing custom data collection forms in a secure, multi-user environment. It moves beyond static forms by providing a complete lifecycle management tool: from AI-assisted creation and a drag-and-drop builder to a powerful administrative backend for data filtering, visualization, and export.
+This project solves the challenge of creating and managing custom data collection forms in a secure, multi-user environment. It moves beyond static forms by providing a complete lifecycle management tool: from AI-assisted creation and an intuitive UI to a powerful administrative backend for data filtering, visualization, and export.
 
 ## 🏛️ Project Philosophy
 
 The development of this platform is guided by four core principles:
 
-1.  **Security First:** Every feature, from authentication to database interaction, is designed with security as the foremost priority. We leverage Django's built-in security features for protection against CSRF, XSS, and SQL injection, supplemented with a custom OTP-based password reset flow.
+1.  **Security First:** Every feature, from authentication to database interaction, is designed with security as the foremost priority. We leverage Django's built-in, robust, and industry-standard security features for protection against CSRF, XSS, and SQL injection, including its token-based password reset flow.
 2.  **Seamless User Experience:** The interface is designed to be intuitive for all user roles. Complex actions like form creation or data analysis are presented in a clean, aesthetic "command center" UI that feels like a native application.
 3.  **Flexible & Scalable Architecture:** The EAV (Entity-Attribute-Value) database schema is designed to handle an infinite number of form variations without requiring database schema changes, ensuring long-term scalability and maintainability.
 4.  **Developer-Friendly & Maintainable:** With a clear separation of concerns, comprehensive documentation, and adherence to Django best practices, the codebase is easy to understand, maintain, and extend.
@@ -43,8 +44,8 @@ The development of this platform is guided by four core principles:
 <details>
   <summary><strong>👤 User & Access Management</strong></summary>
   
-  - **Secure Authentication:** Comprehensive login, registration, and password reset system using Django's robust authentication framework.
-  - **OTP Password Reset:** Secure, time-sensitive One-Time Password (OTP) system delivered via SMTP for password recovery.
+  - **Secure Authentication:** Comprehensive login, registration, and password reset system using Django's robust and secure built-in authentication framework.
+  - **Secure Password Reset:** Industry-standard, secure, time-sensitive token-based password reset links delivered via SMTP.
   - **Role-Based Access Control (RBAC):**
     - **Admin:** Full control over all forms, data, and users.
     - **Editor:** Can create forms and manage permissions for them.
@@ -55,12 +56,13 @@ The development of this platform is guided by four core principles:
 <details>
   <summary><strong>📝 Form Lifecycle Management</strong></summary>
   
-  - **Drag-and-Drop Form Builder:** Powered by `SortableJS`, users can intuitively create and reorder form fields.
+  - **Intuitive Form Builder:** A clean user interface allows for the manual creation of complex forms with various field types.
   - **AI-Powered Field Generation:** Describe a form's purpose in natural language (e.g., "a patient intake form") and have the AI (Ollama/Llama2) instantly generate the corresponding JSON field structure.
   - **Dynamic Schema:** Creating a form does not alter the database schema, allowing for true on-the-fly form creation and editing.
   - **Advanced Form Relationships:**
     - **Parent-Child Links:** Establish hierarchies between forms (e.g., link "Students" to a "School").
     - **Child-to-Child Links:** Create relationships between records from different child forms under the same parent (e.g., link a "Teacher" record to a "Student" record).
+  - **Form Versioning:** Editing a form archives the old version and creates a new one, preserving historical data integrity.
 </details>
 
 <details>
@@ -68,8 +70,8 @@ The development of this platform is guided by four core principles:
 
   - **Public Sharing:** Generate unique, secure URLs to share forms publicly for data collection from unauthenticated users.
   - **Interactive Analytics Dashboard:**
-    - Visualize data with interactive charts and graphs from **Plotly**.
-    - View Key Performance Indicators (KPIs) like total submissions.
+    - Visualize data with interactive charts (pies, bars, histograms) from **Plotly**.
+    - View Key Performance Indicators (KPIs) like total submissions and child form statistics.
   - **Data Export:** Download filtered submission data in **CSV**, **PDF**, and **Excel** formats.
   - **Powerful Search:** Full-text search within all submissions for a given form.
 </details>
@@ -91,11 +93,11 @@ For a detailed technical blueprint, including the database schema and component 
 | **Backend**   | Python 3.11+, Django 5.2+                     |
 | **Database**  | PostgreSQL                                    |
 | **Frontend**  | HTML5, Bootstrap 5, JavaScript (ES6+)         |
-| **JS Libs**   | SortableJS, Plotly.js                         |
+| **JS Libs**   | Plotly.js                                     |
 | **Admin**     | Django Jazzmin                                |
 | **AI**        | Ollama (Llama 2)                              |
 | **Data Tools**| Pandas, FPDF, OpenPyXL                        |
-| **Security**  | Django Authentication & CSRF Protection       |
+| **Security**  | Django Authentication, CSRF & XSS Protection  |
 
 ## 🚀 Local Development Setup
 
@@ -104,12 +106,12 @@ Follow these instructions to set up and run the project locally.
 ### 1. Prerequisites
 - Python 3.9+
 - PostgreSQL (v12 or higher)
-- Ollama installed and serving a model (e.g., `ollama run llama2`) --- (it's optional if you want to use AI than you have to do it otherwise leave it)
+- **(Optional)** Ollama installed and serving a model (e.g., `ollama run llama2`) if you wish to use the AI features.
 
 ### 2. Clone the Repository
 ```bash
 git clone <your-repository-url>
-cd <repository-folder>
+cd <repository-folder-name>
 ```
 
 ### 3. Create a Virtual Environment
@@ -179,4 +181,5 @@ This platform provides a solid foundation. Future enhancements could include:
 * Containerization: Provide Dockerfile and docker-compose.yml for easy deployment.
 
 ### 📄 License
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. -->
+ -->
